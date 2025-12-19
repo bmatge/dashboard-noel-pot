@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan Annuel 2024 - Dashboard Officiel de l'Équipe</title>
+
+    <!-- DSFR CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/utility/icons/icons.min.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .fr-container--fluid {
+            max-width: 100% !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        .fr-header { padding: 0; }
+        .fr-header__body { padding: 0.4rem 0; }
+        .fr-header__service-title { font-size: 1.2rem; }
+        .fr-header__service-tagline { font-size: 0.8rem; }
+
+        .main-content {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Countdown row */
+        .countdown-section {
+            background: #f6f6f6;
+            border-left: 4px solid #e1000f;
+            padding: 0.4rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .countdown-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #161616;
+            white-space: nowrap;
+        }
+
+        .countdown-values { display: flex; gap: 1.5rem; }
+        .countdown-item { text-align: center; }
+        .countdown-number {
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #000091;
+            line-height: 1;
+        }
+        .countdown-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .progress-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .progress-item { display: flex; align-items: center; gap: 0.5rem; }
+        .progress-label { font-size: 0.75rem; min-width: 135px; white-space: nowrap; }
+        .progress-bar-container {
+            flex: 1;
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 14px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #000091, #6a6af4);
+        }
+        .progress-bar.danger { background: linear-gradient(90deg, #e1000f, #ff6b6b); }
+        .progress-value { font-size: 0.75rem; font-weight: bold; min-width: 35px; text-align: right; }
+
+        /* Thematic sections */
+        .sections-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            min-height: 0;
+        }
+
+        .theme-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .theme-header {
+            padding: 0.3rem 0.5rem;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-bottom: 2px solid;
+        }
+
+        .theme-header.communication { background: #e8edff; border-color: #000091; color: #000091; }
+        .theme-header.technique { background: #fef4f4; border-color: #e1000f; color: #c9191e; }
+        .theme-header.dsfr { background: #e6f7e6; border-color: #18753c; color: #18753c; }
+        .theme-header.vie { background: #fef6e6; border-color: #b34000; color: #b34000; }
+
+        .theme-content {
+            flex: 1;
+            padding: 0.3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.25rem;
+            overflow: hidden;
+        }
+
+        .stat-card {
+            background: #fafafa;
+            border: 1px solid #eee;
+            padding: 0.25rem 0.35rem;
+            border-radius: 3px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #161616;
+            font-weight: 500;
+            line-height: 1.15;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            height: 2.3em;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .stat-value-row {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            height: 1.6rem;
+        }
+
+        .stat-emoji { font-size: 1.1rem; }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000091;
+            line-height: 1;
+        }
+        .stat-number.danger { color: #e1000f; }
+        .stat-number.success { color: #18753c; }
+        .stat-number.warning { color: #b34000; }
+
+        .stat-detail {
+            font-size: 0.6rem;
+            color: #666;
+            font-style: italic;
+            height: 1.1em;
+            margin-top: 0.1rem;
+        }
+
+        /* Footer */
+        .fr-footer { padding: 0.3rem 0; }
+        .fr-footer__body { padding: 0; }
+        .fr-footer__content-desc { font-size: 0.7rem; margin: 0; }
+        .footer-joke { font-style: italic; color: #666; font-size: 0.65rem; }
+
+        @media (min-width: 1600px) {
+            .stat-number { font-size: 1.7rem; }
+            .countdown-number { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Header DSFR -->
+        <header role="banner" class="fr-header">
+            <div class="fr-header__body">
+                <div class="fr-container--fluid">
+                    <div class="fr-header__body-row">
+                        <div class="fr-header__brand fr-enlarge-link">
+                            <div class="fr-header__brand-top">
+                                <div class="fr-header__logo">
+                                    <p class="fr-logo">République<br>Française</p>
+                                </div>
+                            </div>
+                            <div class="fr-header__service">
+                                <a href="#" title="Accueil">
+                                    <p class="fr-header__service-title">Bilan Annuel 2025 - Dashboard Officiel</p>
+                                </a>
+                                <p class="fr-header__service-tagline">Mission Ingénierie du Web</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Countdown -->
+            <div class="countdown-section">
+                <span class="countdown-title">⏰ Temps restant avant Noël :</span>
+                <div class="countdown-values">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="days">--</div>
+                        <div class="countdown-label">Jours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="hours">--</div>
+                        <div class="countdown-label">Heures</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="minutes">--</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="seconds">--</div>
+                        <div class="countdown-label">Secondes</div>
+                    </div>
+                </div>
+                <div class="progress-section" style="flex: 1; margin-left: 2rem;">
+                    <div class="progress-item">
+                        <span class="progress-label">🎁 Secret Santa acheté</span>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 67%;"></div></div>
+                        <span class="progress-value">67%</span>
+                    </div>
+                    <div class="progress-item">
+                        <span class="progress-label">🎄 Motivation janvier</span>
+                        <div class="progress-bar-container"><div class="progress-bar danger" style="width: 12%;"></div></div>
+                        <span class="progress-value">12%</span>
+                    </div>
+                    <div class="progress-item">
+                        <span class="progress-label">🥂 Hâte pour le pot</span>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: 100%;"></div></div>
+                        <span class="progress-value">100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sections thématiques -->
+            <div class="sections-grid">
+                <!-- Communication & Réunions -->
+                <div class="theme-section">
+                    <div class="theme-header communication">📞 Communication & Réunions</div>
+                    <div class="theme-content">
+                        <div class="stat-card">
+                            <div class="stat-label">Réunions → auraient pu être un mail</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">📧</span>
+                                <span class="stat-number danger">847</span>
+                            </div>
+                            <div class="stat-detail">2h de perdues chacune</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Mails → auraient dû être une réunion</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🤝</span>
+                                <span class="stat-number success">12</span>
+                            </div>
+                            <div class="stat-detail">47 réponses à tous</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Temps à chercher le lien Teams</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🔍</span>
+                                <span class="stat-number warning">47h</span>
+                            </div>
+                            <div class="stat-detail">"c'est dans l'invite"</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Partages d'écran avec notifs gênantes</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🔔</span>
+                                <span class="stat-number danger">23</span>
+                            </div>
+                            <div class="stat-detail">WhatsApp a frappé</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">"T'es en mute" prononcé</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🔇</span>
+                                <span class="stat-number">1 247</span>
+                            </div>
+                            <div class="stat-detail">occurrences</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Réunions évitées avec succès</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🏃</span>
+                                <span class="stat-number success">156</span>
+                            </div>
+                            <div class="stat-detail">312h de vie sauvées</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technique & Dev -->
+                <div class="theme-section">
+                    <div class="theme-header technique">💻 Technique & Développement</div>
+                    <div class="theme-content">
+                        <div class="stat-card">
+                            <div class="stat-label">"Ça marche sur ma machine"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🖥️</span>
+                                <span class="stat-number">156</span>
+                            </div>
+                            <div class="stat-detail">cas recensés</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Tickets rouverts après "Résolu"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🔄</span>
+                                <span class="stat-number danger">89</span>
+                            </div>
+                            <div class="stat-detail">"ah non en fait..."</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Commits "fix fix fix"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">📝</span>
+                                <span class="stat-number warning">342</span>
+                            </div>
+                            <div class="stat-detail">historique Git sublime</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Déploiements un vendredi soir</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🚀</span>
+                                <span class="stat-number danger">3</span>
+                            </div>
+                            <div class="stat-detail">regrettés : 3</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Certifs SSL expirés (usager)</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🔐</span>
+                                <span class="stat-number danger">2</span>
+                            </div>
+                            <div class="stat-detail">alerte Tchap à 23h</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Bugs → "comportement attendu"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🐛</span>
+                                <span class="stat-number success">67</span>
+                            </div>
+                            <div class="stat-detail">documentation màj</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DSFR & Accessibilité -->
+                <div class="theme-section">
+                    <div class="theme-header dsfr">♿ DSFR & Accessibilité</div>
+                    <div class="theme-content">
+                        <div class="stat-card">
+                            <div class="stat-label">Composants DSFR détournés</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🎨</span>
+                                <span class="stat-number warning">28</span>
+                            </div>
+                            <div class="stat-detail">"créativement"</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Score RGAA avant audit</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">📊</span>
+                                <span class="stat-number success">+15%</span>
+                            </div>
+                            <div class="stat-detail">magiquement amélioré</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Mentions légales copiées-collées</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">📋</span>
+                                <span class="stat-number">94%</span>
+                            </div>
+                            <div class="stat-detail">sans relecture</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Demandes "perdues"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🙈</span>
+                                <span class="stat-number danger">342</span>
+                            </div>
+                            <div class="stat-detail">mystérieusement</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Mails "URGENT" reçus</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">📧</span>
+                                <span class="stat-number warning">1 247</span>
+                            </div>
+                            <div class="stat-detail">1 243 pas urgents</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Bugs → Features</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🐛</span>
+                                <span class="stat-number success">89</span>
+                            </div>
+                            <div class="stat-detail">+23% vs 2023</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vie d'équipe -->
+                <div class="theme-section">
+                    <div class="theme-header vie">☕ Vie d'Équipe & Records</div>
+                    <div class="theme-content">
+                        <div class="stat-card">
+                            <div class="stat-label">Cafés consommés</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">☕</span>
+                                <span class="stat-number" id="coffee-counter">2 847</span>
+                            </div>
+                            <div class="stat-detail">11,4 par jour ouvré</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Record cafés en 1 jour</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🥇</span>
+                                <span class="stat-number danger">14</span>
+                            </div>
+                            <div class="stat-detail">migration BD 15 mars</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Pots organisés</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🍾</span>
+                                <span class="stat-number success">38</span>
+                            </div>
+                            <div class="stat-detail">objectif atteint !</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Siestes déguisées en "réflexion"</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">😴</span>
+                                <span class="stat-number">47</span>
+                            </div>
+                            <div class="stat-detail">regard fixe maîtrisé</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Réponse mail viennoiseries</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">⚡</span>
+                                <span class="stat-number success">0.3s</span>
+                            </div>
+                            <div class="stat-detail">vs 3 sem. reporting</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Excuse de l'année</div>
+                            <div class="stat-value-row">
+                                <span class="stat-emoji">🏆</span>
+                                <span class="stat-number" style="font-size: 0.85rem;">"C'est du ML"</span>
+                            </div>
+                            <div class="stat-detail">pour un bug en prod</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer DSFR -->
+        <footer class="fr-footer" role="contentinfo">
+            <div class="fr-container--fluid">
+                <div class="fr-footer__body">
+                    <div class="fr-footer__brand fr-enlarge-link">
+                        <p class="fr-logo" title="République française">République<br>Française</p>
+                    </div>
+                    <div class="fr-footer__content">
+                        <p class="fr-footer__content-desc">
+                            Mission Ingénierie du Web — 🎄 Joyeuses fêtes à toute l'équipe ! 🎅
+                            <span class="footer-joke"> — Données 100% scientifiques (source : "trust me bro")</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- DSFR JS -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js"></script>
+
+    <script>
+        function updateCountdown() {
+            const now = new Date();
+            const christmas = new Date(now.getFullYear(), 11, 25, 0, 0, 0);
+            if (now > christmas) christmas.setFullYear(christmas.getFullYear() + 1);
+            const diff = christmas - now;
+
+            document.getElementById('days').textContent = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById('hours').textContent = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }
+
+        function animateCoffeeCounter() {
+            const target = 2847;
+            const counter = document.getElementById('coffee-counter');
+            let current = 0;
+            const increment = Math.ceil(target / 100);
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) { current = target; clearInterval(timer); }
+                counter.textContent = current.toLocaleString('fr-FR');
+            }, 20);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+            setTimeout(animateCoffeeCounter, 500);
+        });
+    </script>
+</body>
+</html>
